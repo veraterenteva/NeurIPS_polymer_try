@@ -42,3 +42,36 @@ class Visualizer:
         sns.heatmap(df.corr(numeric_only=True), annot=False, cmap="viridis")
         plt.title("Correlation Heatmap")
         plt.show()
+
+    @staticmethod
+    def plot_target_availability(df, targets=None):
+        # Строим статистику по наличию/отсутствию таргетов и их комбинациям,
+        # чтобы оценить разреженность датасета
+
+        if targets is None:
+            targets = ["Tg", "Tc", "Rg", "FFV"]
+
+        if targets is None:
+            targets = ["Tg", "Tc", "Rg", "FFV"]
+
+        # булева матрица: 1 = значение есть, 0 = NaN
+        availability = df[targets].notna().astype(int)
+
+        # группировка по уникальным комбинациям
+        combo_counts = availability.value_counts().reset_index(name="count")
+
+        print("Полная статистика по комбинациям наличия таргетов:")
+        print(combo_counts)
+
+        # агрегация по числу известных таргетов
+        availability["num_targets"] = availability.sum(axis=1)
+        agg_counts = availability["num_targets"].value_counts().sort_index()
+
+        plt.figure(figsize=(7, 5))
+        sns.barplot(x=agg_counts.index, y=agg_counts.values, palette="viridis")
+        plt.xlabel("Количество известных таргетов в записи")
+        plt.ylabel("Количество записей")
+        plt.title("Распределение по числу таргетов")
+        plt.show()
+
+        return combo_counts, agg_counts
