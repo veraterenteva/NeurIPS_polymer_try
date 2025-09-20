@@ -51,9 +51,6 @@ class Visualizer:
         if targets is None:
             targets = ["Tg", "Tc", "Rg", "FFV"]
 
-        if targets is None:
-            targets = ["Tg", "Tc", "Rg", "FFV"]
-
         # булева матрица: 1 = значение есть, 0 = NaN
         availability = df[targets].notna().astype(int)
 
