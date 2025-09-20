@@ -1,6 +1,12 @@
+from LSTM_RF_Hybrid.model import MaskedMSELoss, HybridLSTMMLP
+from LSTM_RF_Hybrid.preprocessing import PolymerDataset, SMILESVocab
+from LSTM_RF_Hybrid.trainer import HybridTrainer
 from data_loader import DataLoader, Visualizer
 from descriptors import DescriptorCalculator
+import torch
+import torch.nn as nn
 import pandas as pd
+from torch.utils.data import Dataset, DataLoader as TorchDataLoader
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, Normalizer
 from sklearn.impute import SimpleImputer
@@ -76,8 +82,7 @@ if __name__ == "__main__":
 
     rf_model = RandomForestRegressor()
     rf_model.fit(descripted_df)
-
-    # Оценка
+    # # Оценка
     results = rf_model.evaluate(descripted_df)
     print("Результаты:")
     for target, metrics in results.items():
@@ -87,3 +92,35 @@ if __name__ == "__main__":
     preds = rf_model.predict(descripted_df)
     print("Предсказания:")
     print(preds.head())
+    #
+    vocab = SMILESVocab(descripted_df["SMILES"].tolist())
+
+
+    # dataset = PolymerDataset(descripted_df, vocab, targets)
+    # dataloader = TorchDataLoader(dataset, batch_size=64, shuffle=True)
+    #
+    # #  Модель
+    # desc_dim = dataset[0][1].shape[0]
+    # model = HybridLSTMMLP(
+    #      vocab_size=len(vocab.vocab)+1,
+    #      embed_dim=64,
+    #      lstm_hidden=128,
+    #      desc_dim=desc_dim,
+    #      mlp_hidden=64,
+    #      output_dim=len(targets)
+    #  )
+    #
+    # optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    # criterion = MaskedMSELoss()
+    #
+    # trainer = HybridTrainer(model, optimizer, criterion, device="cpu")
+    #
+    # #  Обучение
+    # for epoch in range(5):
+    #     train_loss = trainer.train_epoch(dataloader)
+    #     val_loss = trainer.evaluate(dataloader)
+    #     print(f"Epoch {epoch+1}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
+    #
+    # #  Предсказания
+    # preds = trainer.predict(dataloader)
+    # print("Предсказания (shape):", preds.shape)
