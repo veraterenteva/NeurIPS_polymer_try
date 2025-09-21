@@ -1,6 +1,7 @@
 from LSTM_RF_Hybrid.model import MaskedMSELoss, HybridLSTMMLP
 from LSTM_RF_Hybrid.preprocessing import PolymerDataset, SMILESVocab
 from LSTM_RF_Hybrid.trainer import HybridTrainer
+from LSTMmol.LSTMmol import SMILESLSTMTrainer
 from data_loader import DataLoader, Visualizer
 from descriptors import DescriptorCalculator
 import torch
@@ -11,10 +12,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, Normalizer
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor
-from tqdm.notebook import tqdm as notebook_tqdm
-import tqdm
-tqdm.tqdm = notebook_tqdm
-tqdm.trange = notebook_tqdm
 from torch_molecule import LSTMMolecularPredictor
 from torch_molecule.utils.search import ParameterType, ParameterSpec
 import numpy as np
@@ -30,10 +27,9 @@ from sklearn.metrics import mean_squared_error, r2_score
 # or somehow mask the lack of the data, how it's recommended
 
 # TODO: model classes and OOP design for future maintenance
-# TODO: baseline solution (notebook example)
+# TODO: make baseline solutions to the submission ready form
 # TODO: more features from RDKit
-# TODO: EDA?
-# TODO: How to deal with the lack of data?
+# TODO: make it run and get the result!
 # TODO: requirements.txt
 
 class PolymerAnalysis:
@@ -80,22 +76,24 @@ if __name__ == "__main__":
         if c not in ["SMILES"] + targets
     ]
 
-    rf_model = RandomForestRegressor()
-    rf_model.fit(descripted_df)
-    # # Оценка
-    results = rf_model.evaluate(descripted_df)
-    print("Результаты:")
-    for target, metrics in results.items():
-        print(f"{target}: MSE={metrics['MSE']:.3f}, R²={metrics['R2']:.3f}, samples={metrics['n_samples']}")
-
-    # Предсказания на всём датасете
-    preds = rf_model.predict(descripted_df)
-    print("Предсказания:")
-    print(preds.head())
+    # Опция 1: RANDOM FOREST MODEL
+    # rf_model = RandomForestRegressor()
+    # rf_model.fit(descripted_df)
+    # # # Оценка
+    # results = rf_model.evaluate(descripted_df)
+    # print("Результаты:")
+    # for target, metrics in results.items():
+    #     print(f"{target}: MSE={metrics['MSE']:.3f}, R²={metrics['R2']:.3f}, samples={metrics['n_samples']}")
     #
-    vocab = SMILESVocab(descripted_df["SMILES"].tolist())
+    # # Предсказания на всём датасете
+    # preds = rf_model.predict(descripted_df)
+    # print("Предсказания:")
+    # print(preds.head())
+    # #
+    # vocab = SMILESVocab(descripted_df["SMILES"].tolist())
 
 
+    # Опция 2: ГИБРИДНАЯ МОДЕЛЬ LSTM И ДЕСКРИПТОРЫ
     # dataset = PolymerDataset(descripted_df, vocab, targets)
     # dataloader = TorchDataLoader(dataset, batch_size=64, shuffle=True)
     #
@@ -124,3 +122,19 @@ if __name__ == "__main__":
     # #  Предсказания
     # preds = trainer.predict(dataloader)
     # print("Предсказания (shape):", preds.shape)
+
+    # Опция 3: SMILES LSTM molecular predictor
+    csv_path = 'train.csv'
+    train_df = pd.read_csv(csv_path)
+
+    trainer = SMILESLSTMTrainer("train.csv")
+
+    dev_train, dev_val, dev_test = trainer.prepare_data()
+    trainer.train(dev_train, dev_val)
+
+    mse_per_task, mse_overall = trainer.evaluate(dev_test)
+
+    print("MSE per task:")
+    for name, mse in mse_per_task.items():
+        print(f"  {name}: {mse:.4f}")
+    print(f"Overall MSE: {mse_overall:.4f}")
