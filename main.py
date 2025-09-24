@@ -26,10 +26,9 @@ from sklearn.metrics import mean_squared_error, r2_score
 # dataset4.csv - data from the host’s older simulation results
 # or somehow mask the lack of the data, how it's recommended
 
-# TODO: model classes and OOP design for future maintenance
-# TODO: make baseline solutions to the submission ready form
+# TODO: merge all datasets in one, like in full_pipeline_for_kaggle.py
+# TODO: achieve all models results and ready to submit state
 # TODO: more features from RDKit
-# TODO: make it run and get the result!
 # TODO: requirements.txt
 
 class PolymerAnalysis:
