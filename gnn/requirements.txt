@@ -1,0 +1,10 @@
+torch>=2.2
+torch-geometric>=2.5
+torch-scatter
+torch-sparse
+torch-cluster
+rdkit-pypi
+pandas
+numpy
+scikit-learn
+tqdm
